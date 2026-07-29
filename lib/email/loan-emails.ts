@@ -43,6 +43,62 @@ export async function sendReceiptEmail(
   if (sent) await logEmail(supabase, loan.loanId, "receipt");
 }
 
+export async function sendDueSoonEmail(
+  supabase: SupabaseClient,
+  loan: {
+    loanId: string;
+    to: string;
+    firstName: string;
+    bookTitle: string;
+    dueAtIso: string;
+  }
+): Promise<boolean> {
+  const dueDate = formatFriendlyDate(loan.dueAtIso);
+  const sent = await sendEmail({
+    to: loan.to,
+    subject: `A gentle reminder: ${loan.bookTitle} is due soon`,
+    text: [
+      `Hi ${loan.firstName},`,
+      ``,
+      `Just a friendly reminder that ${loan.bookTitle} is due back at the library by ${dueDate}.`,
+      ``,
+      `No rush if you're mid-chapter — just bring it along when it's due.`,
+      ``,
+      `Christian Life Camps Bay Library`,
+    ].join("\n"),
+  });
+  if (sent) await logEmail(supabase, loan.loanId, "due_soon");
+  return sent;
+}
+
+export async function sendOverdueEmail(
+  supabase: SupabaseClient,
+  loan: {
+    loanId: string;
+    to: string;
+    firstName: string;
+    bookTitle: string;
+    dueAtIso: string;
+  }
+): Promise<boolean> {
+  const dueDate = formatFriendlyDate(loan.dueAtIso);
+  const sent = await sendEmail({
+    to: loan.to,
+    subject: `${loan.bookTitle} is overdue`,
+    text: [
+      `Hi ${loan.firstName},`,
+      ``,
+      `${loan.bookTitle} was due back on ${dueDate}. Please bring it in next time you're at church — the next reader will be glad to see it.`,
+      ``,
+      `Thank you!`,
+      ``,
+      `Christian Life Camps Bay Library`,
+    ].join("\n"),
+  });
+  if (sent) await logEmail(supabase, loan.loanId, "overdue");
+  return sent;
+}
+
 export async function sendThankYouEmail(
   supabase: SupabaseClient,
   loan: {

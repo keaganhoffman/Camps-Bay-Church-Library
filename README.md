@@ -12,8 +12,8 @@ kiosk, an admin area, and automated email reminders.
 | 1 | Project scaffold, database schema, seed data | ✅ |
 | 2 | Kiosk borrow flow | ✅ |
 | 3 | Kiosk return flow + idle reset | ✅ |
-| 4 | Receipt + thank-you emails (Resend) | ✅ this branch |
-| 5 | Daily cron: due-soon + overdue emails | — |
+| 4 | Receipt + thank-you emails (Resend) | ✅ |
+| 5 | Daily cron: due-soon + overdue emails | ✅ this branch |
 | 6 | Admin area (PIN gate, CRUD, CSV import) | — |
 | 7 | Stock count | — |
 | 8 | Polish, PWA, deploy | — |
@@ -115,6 +115,50 @@ Then test:
 4. Members with fake `@example.com` addresses simply won't get mail (Resend
    declines it, the kiosk carries on) — emails failing never blocks a
    borrow or return.
+
+## Testing Phase 5 (daily reminder emails)
+
+One-time setup:
+
+1. In Vercel → Settings → your Production environment variables, add
+   **`CRON_SECRET`** with any long random string you invent (20+ characters,
+   letters and numbers — it's a password for the reminder job).
+2. Redeploy (Deployments → ⋯ → Redeploy). Vercel reads `vercel.json` and
+   schedules the job daily at 06:00 UTC (08:00 South African time).
+
+Create two fake loans to trigger both email types — paste this into the
+Supabase **SQL Editor** and Run (it lends Grace two books with artificial
+due dates: one due in 2 days, one 4 days overdue):
+
+```sql
+insert into loans (member_id, book_id, borrowed_at, due_at)
+select m.id, b.id, now() - interval '28 days', now() + interval '2 days'
+from members m, books b
+where m.full_name = 'Grace Ndlovu' and b.title = 'Knowing God';
+
+insert into loans (member_id, book_id, borrowed_at, due_at)
+select m.id, b.id, now() - interval '34 days', now() - interval '4 days'
+from members m, books b
+where m.full_name = 'Grace Ndlovu' and b.title = 'Prayer';
+```
+
+Then trigger a run by opening this in your browser (swap in your site and
+your secret):
+
+```
+https://YOUR-SITE.vercel.app/api/cron/reminders?key=YOUR-CRON-SECRET
+```
+
+What you should see:
+
+- The page shows a JSON summary: 1 due-soon sent, 1 overdue sent.
+- Your inbox gets **"A gentle reminder: Knowing God is due soon"** and
+  **"Prayer is overdue"**.
+- **Refresh the page** — the summary now shows 0 sent (already-sent counts
+  instead). That's the email_log idempotency working: due-soon goes out once
+  ever per loan; overdue at most once per day (it would send again tomorrow).
+- Clean up afterwards: return both books via the kiosk, or delete the two
+  loan rows in Table Editor.
 
 ## How the pieces fit
 
