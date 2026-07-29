@@ -80,6 +80,9 @@ export default function MemberSignIn({
 
   return (
     <>
+      <Link href="/" className="back-btn">
+        <span className="chevron">‹</span> Back
+      </Link>
       <h1>{heading}</h1>
       <p className="lede">Find your name, then enter your PIN.</p>
       <input
@@ -101,9 +104,6 @@ export default function MemberSignIn({
           </button>
         ))}
       </div>
-      <Link href="/" className="link-btn">
-        Back to start
-      </Link>
     </>
   );
 }

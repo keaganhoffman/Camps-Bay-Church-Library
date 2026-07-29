@@ -98,6 +98,9 @@ export default function BorrowFlow() {
     );
     return (
       <>
+        <Link href="/" className="back-btn">
+          <span className="chevron">‹</span> Back
+        </Link>
         <h1>Choose a book</h1>
         <p className="lede">Only books on the shelf can be borrowed.</p>
         <input
@@ -137,9 +140,6 @@ export default function BorrowFlow() {
             </button>
           ))}
         </div>
-        <Link href="/" className="link-btn">
-          Back to start
-        </Link>
       </>
     );
   }

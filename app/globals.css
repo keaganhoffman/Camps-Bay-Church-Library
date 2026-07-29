@@ -230,6 +230,31 @@ code {
   padding: 12px;
 }
 
+/* Back button — top-left, iOS style */
+
+.back-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 20px 8px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.back-btn .chevron {
+  font-size: 24px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
 /* Search + lists */
 
 .kiosk-search {

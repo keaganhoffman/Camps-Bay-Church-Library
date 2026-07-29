@@ -100,6 +100,9 @@ export default function ReturnFlow() {
   if (step === "loans" && member) {
     return (
       <>
+        <Link href="/" className="back-btn">
+          <span className="chevron">‹</span> Back
+        </Link>
         <h1>Welcome back, {firstName(member.full_name)}</h1>
         <p className="lede">Which book are you returning?</p>
         <div className="kiosk-list">
@@ -130,9 +133,6 @@ export default function ReturnFlow() {
             </button>
           ))}
         </div>
-        <Link href="/" className="link-btn">
-          Back to start
-        </Link>
       </>
     );
   }
