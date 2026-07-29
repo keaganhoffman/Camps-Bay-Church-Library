@@ -157,11 +157,17 @@ code {
   margin: auto 0;
 }
 
+.welcome-subtitle {
+  color: var(--ink-secondary);
+  font-size: 22px;
+  margin-top: 6px;
+}
+
 .welcome-actions {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
 .kiosk-footer {
@@ -555,4 +561,41 @@ code {
 .import-textarea:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+/* --- Guest signup ------------------------------------------- */
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 28px 24px;
+}
+
+.kiosk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kiosk-field span {
+  font-size: 15px;
+  color: var(--ink-secondary);
+}
+
+.kiosk-field .admin-input {
+  font-size: 18px;
+  min-height: 52px;
+}
+
+.signup-pins {
+  display: flex;
+  gap: 16px;
+}
+
+.signup-pins .kiosk-field {
+  flex: 1;
 }
