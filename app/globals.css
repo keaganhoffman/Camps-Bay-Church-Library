@@ -124,3 +124,272 @@ code {
   border-radius: 6px;
   font-size: 15px;
 }
+
+/* --- Kiosk (Phase 2+) --------------------------------------- */
+
+.kiosk-page {
+  max-width: 640px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 48px 24px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kiosk-page .lede {
+  color: var(--ink-secondary);
+  margin: 8px 0 24px;
+}
+
+.sub {
+  color: var(--ink-secondary);
+  font-size: 15px;
+}
+
+/* Welcome screen */
+
+.welcome-page {
+  text-align: center;
+  justify-content: center;
+}
+
+.welcome-inner {
+  margin: auto 0;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.kiosk-footer {
+  text-align: center;
+  padding-top: 32px;
+}
+
+.kiosk-footer a {
+  color: var(--ink-secondary);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+/* Buttons */
+
+.big-btn {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  padding: 18px 28px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.big-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.big-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.link-btn {
+  display: block;
+  margin: 20px auto 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 17px;
+  cursor: pointer;
+  padding: 12px;
+}
+
+/* Search + lists */
+
+.kiosk-search {
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 20px;
+  font-size: 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+}
+
+.kiosk-search:focus {
+  border-color: var(--accent);
+}
+
+.kiosk-list {
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.kiosk-list .list-note {
+  padding: 20px;
+}
+
+.kiosk-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 60px;
+  padding: 14px 20px;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+  color: var(--ink);
+  font-size: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kiosk-row:last-child {
+  border-bottom: none;
+}
+
+.kiosk-row:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.book-row .book-title {
+  min-width: 0;
+}
+
+/* Cards */
+
+.kiosk-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 32px 28px;
+  margin: auto 0;
+  text-align: center;
+}
+
+.confirm-card {
+  text-align: left;
+}
+
+.confirm-book {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.confirm-facts {
+  margin: 20px 0 24px;
+}
+
+.confirm-error {
+  color: var(--alert);
+  margin-bottom: 16px;
+}
+
+.success-card .success-mark {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  font-size: 40px;
+  line-height: 72px;
+}
+
+.success-card .big-btn {
+  margin-top: 24px;
+}
+
+/* PIN pad — styled like the iPad lock screen */
+
+.pinpad {
+  text-align: center;
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin: 8px 0 4px;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+}
+
+.pin-dot.filled {
+  background: var(--ink);
+}
+
+.pin-dots.shake {
+  animation: pin-shake 0.45s ease;
+}
+
+@keyframes pin-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-12px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(6px); }
+}
+
+.pin-message {
+  min-height: 26px;
+  color: var(--alert);
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.pin-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 86px);
+  gap: 18px;
+  justify-content: center;
+}
+
+.pin-key {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.pin-key:active {
+  background: var(--accent-soft);
+}
+
+.pin-key-light {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+}

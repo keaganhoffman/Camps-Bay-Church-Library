@@ -9,8 +9,8 @@ kiosk, an admin area, and automated email reminders.
 
 | Phase | What | Status |
 | ----- | ---- | ------ |
-| 1 | Project scaffold, database schema, seed data | ✅ this branch |
-| 2 | Kiosk borrow flow | — |
+| 1 | Project scaffold, database schema, seed data | ✅ |
+| 2 | Kiosk borrow flow | ✅ this branch |
 | 3 | Kiosk return flow + idle reset | — |
 | 4 | Receipt + thank-you emails (Resend) | — |
 | 5 | Daily cron: due-soon + overdue emails | — |
@@ -56,6 +56,25 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). You should see a status
 page listing the 5 test members and 8 test books, each showing a green
 "On shelf" badge. If you see that, Phase 1 works and we can start Phase 2.
+
+## Testing Phase 2 (the borrow flow)
+
+With `.env.local` filled in and `npm run dev` running, open
+[http://localhost:3000](http://localhost:3000):
+
+1. You'll see the kiosk **Welcome** screen. Tap **Borrow a book**.
+2. Search for and tap a test member (e.g. *Grace Ndlovu*).
+3. Enter PIN **1234** on the keypad. (Try a wrong PIN first — the dots shake.
+   Five wrong attempts locks that member out for 5 minutes.)
+4. Pick a book. Each shows a green **On shelf · N** badge; books with every
+   copy out show a greyed **All out** badge and can't be tapped.
+5. Confirm — you'll see the borrower, the return-by date (30 days out), and
+   copies left. Tap confirm, get the success screen, tap **Done**.
+6. Check [/status](http://localhost:3000/status): that book's shelf count is
+   now one lower. The loan row is in Supabase under **Table Editor → loans**.
+
+No emails are sent yet — that's Phase 4. Returns are Phase 3 (the Return
+button shows a friendly placeholder for now).
 
 ## How the pieces fit
 
