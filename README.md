@@ -14,8 +14,8 @@ kiosk, an admin area, and automated email reminders.
 | 3 | Kiosk return flow + idle reset | ✅ |
 | 4 | Receipt + thank-you emails (Resend) | ✅ |
 | 5 | Daily cron: due-soon + overdue emails | ✅ |
-| 6 | Admin area (PIN gate, CRUD, CSV import) | ✅ this branch |
-| 7 | Stock count | — |
+| 6 | Admin area (PIN gate, CRUD, CSV import) | ✅ |
+| 7 | Stock count | ✅ this branch |
 | 8 | Polish, PWA, deploy | — |
 
 ## Phase 1 setup (do this once)
@@ -181,6 +181,25 @@ enter PIN **123456**:
   sent for desk returns).
 - The admin session lasts 1 hour (then the PIN is asked again); 5 minutes
   of inactivity returns the iPad to the Welcome screen.
+
+## Testing Phase 7 (stock count)
+
+No new SQL needed — the tables have existed since Phase 1.
+
+1. **Admin → Stock count** → type your name → **Start counting**. Every book
+   is listed with the on-shelf number the system expects, pre-filled.
+2. Change a couple: make one book 1 lower (a "lost" copy) and another 1
+   higher (a "found" copy). Tap **Review 2 discrepancies**.
+3. The review screen shows only the mismatches with the adjustment each
+   will apply (red −1 / green +1). Tap **Confirm**.
+4. Check the result: **Admin → Books** now shows the adjusted totals, and
+   the count appears under **Past counts** — tap it to see every line, with
+   the discrepancies badged.
+5. Run a second count and confirm without changing anything — it should
+   record "all matched".
+
+Note: a book's *expected* number counts only copies that should be on the
+shelf — books currently out on loan are not part of the count.
 
 ## How the pieces fit
 

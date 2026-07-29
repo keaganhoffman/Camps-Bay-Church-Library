@@ -64,6 +64,7 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
         <Link href="/admin/books">Books</Link>
         <Link href="/admin/members">Members</Link>
         <Link href="/admin/loans">Loans</Link>
+        <Link href="/admin/stock-count">Stock count</Link>
         <button type="button" className="admin-exit" onClick={exitAdmin}>
           Exit admin
         </button>

@@ -25,12 +25,12 @@ export default function AdminHomePage() {
             <span className="sub"> · everything currently out, overdue filter</span>
           </span>
         </Link>
-        <div className="kiosk-row admin-link-row disabled">
+        <Link href="/admin/stock-count" className="kiosk-row admin-link-row">
           <span>
             Stock count
-            <span className="sub"> · arrives in Phase 7</span>
+            <span className="sub"> · monthly shelf check with adjustments</span>
           </span>
-        </div>
+        </Link>
       </div>
     </>
   );
