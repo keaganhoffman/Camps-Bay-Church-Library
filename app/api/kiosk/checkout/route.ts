@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyMemberPin } from "@/lib/kiosk/verify-pin";
 import { dueDateFromNow } from "@/lib/dates";
+import { sendReceiptEmail } from "@/lib/email/loan-emails";
+import { firstName } from "@/lib/names";
 
 // The borrow confirmation: re-verifies the PIN (never trust the
-// browser), checks a copy is actually on the shelf, then writes the
-// loan. Phase 4 will add the receipt email here.
+// browser), checks a copy is actually on the shelf, writes the loan,
+// then emails the receipt.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const memberId = body?.memberId;
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
   // one while this borrower was deciding.)
   const { data: book, error: bookError } = await supabase
     .from("books_with_availability")
-    .select("id, title, on_shelf")
+    .select("id, title, author, on_shelf")
     .eq("id", bookId)
     .maybeSingle();
 
@@ -46,16 +48,31 @@ export async function POST(request: Request) {
   const borrowedAt = new Date();
   const dueAt = dueDateFromNow(borrowedAt);
 
-  const { error: loanError } = await supabase.from("loans").insert({
-    member_id: memberId,
-    book_id: bookId,
-    borrowed_at: borrowedAt.toISOString(),
-    due_at: dueAt.toISOString(),
-  });
+  const { data: loan, error: loanError } = await supabase
+    .from("loans")
+    .insert({
+      member_id: memberId,
+      book_id: bookId,
+      borrowed_at: borrowedAt.toISOString(),
+      due_at: dueAt.toISOString(),
+    })
+    .select("id")
+    .single();
 
-  if (loanError) {
+  if (loanError || !loan) {
     return NextResponse.json({ error: "Couldn't save the loan" }, { status: 500 });
   }
+
+  // The receipt email. Awaited so the serverless function doesn't get
+  // frozen mid-send, but a failed email never fails the borrow.
+  await sendReceiptEmail(supabase, {
+    loanId: loan.id,
+    to: verification.member.email,
+    firstName: firstName(verification.member.full_name),
+    bookTitle: book.title,
+    bookAuthor: book.author,
+    dueAtIso: dueAt.toISOString(),
+  });
 
   // Re-read the live count so "copies left" on the success screen is accurate.
   const { data: after } = await supabase

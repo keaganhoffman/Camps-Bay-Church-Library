@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyMemberPin } from "@/lib/kiosk/verify-pin";
+import { sendThankYouEmail } from "@/lib/email/loan-emails";
+import { firstName } from "@/lib/names";
 
 // The return confirmation: re-verifies the PIN, checks the loan really
-// belongs to this member and is still open, then stamps returned_at.
-// Phase 4 will add the thank-you email here.
+// belongs to this member and is still open, stamps returned_at, then
+// emails a thank-you.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const memberId = body?.memberId;
@@ -58,6 +60,14 @@ export async function POST(request: Request) {
     .is("returned_at", null);
 
   const book = Array.isArray(loan.books) ? loan.books[0] : loan.books;
+
+  // Thank-you email — awaited, but a failed send never fails the return.
+  await sendThankYouEmail(supabase, {
+    loanId: loan.id,
+    to: verification.member.email,
+    firstName: firstName(verification.member.full_name),
+    bookTitle: book?.title ?? "the book",
+  });
 
   return NextResponse.json({
     ok: true,

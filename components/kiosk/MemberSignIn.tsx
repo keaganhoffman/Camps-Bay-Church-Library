@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PinPad from "./PinPad";
+import { firstName } from "@/lib/names";
 
 export type Member = { id: string; full_name: string };
-
-export function firstName(fullName: string): string {
-  return fullName.split(" ")[0];
-}
 
 // Shared sign-in for both kiosk flows: searchable member list, then
 // the PIN pad. Calls onSignedIn(member, pin) once the server has

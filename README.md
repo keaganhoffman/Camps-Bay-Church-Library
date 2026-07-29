@@ -11,8 +11,8 @@ kiosk, an admin area, and automated email reminders.
 | ----- | ---- | ------ |
 | 1 | Project scaffold, database schema, seed data | ✅ |
 | 2 | Kiosk borrow flow | ✅ |
-| 3 | Kiosk return flow + idle reset | ✅ this branch |
-| 4 | Receipt + thank-you emails (Resend) | — |
+| 3 | Kiosk return flow + idle reset | ✅ |
+| 4 | Receipt + thank-you emails (Resend) | ✅ this branch |
 | 5 | Daily cron: due-soon + overdue emails | — |
 | 6 | Admin area (PIN gate, CRUD, CSV import) | — |
 | 7 | Stock count | — |
@@ -90,6 +90,31 @@ No emails are sent yet — that's Phase 4.
 5. **Idle reset**: on any screen except Welcome, walk away for 60 seconds —
    the kiosk returns to Welcome by itself and forgets everything (any touch
    or keypress restarts the 60-second clock).
+
+## Testing Phase 4 (receipt + thank-you emails)
+
+One-time setup:
+
+1. Create a free account at [resend.com](https://resend.com) (sign up with
+   **your own** email address — that matters below).
+2. In Resend go to **API Keys → Create API Key**, copy it, and paste it into
+   `.env.local` as `RESEND_API_KEY=re_...`. Restart `npm run dev`.
+3. **Important:** until we verify a domain in Phase 8, Resend's sandbox
+   sender only delivers to the email address that owns the Resend account.
+   So in Supabase **Table Editor → members**, change one test member's
+   `email` to your own address.
+
+Then test:
+
+1. Borrow a book as that member → within a minute you should receive
+   **"Your book: …"** with the title, your first name, and the return-by date.
+2. Return it → you should receive **"Thanks for returning …"**.
+3. Each sent email is recorded in **Table Editor → email_log** (types
+   `receipt` and `thank_you`) — that log is what stops the Phase 5 cron from
+   ever double-sending.
+4. Members with fake `@example.com` addresses simply won't get mail (Resend
+   declines it, the kiosk carries on) — emails failing never blocks a
+   borrow or return.
 
 ## How the pieces fit
 

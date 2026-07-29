@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import MemberSignIn, { firstName, type Member } from "./MemberSignIn";
+import MemberSignIn, { type Member } from "./MemberSignIn";
+import { firstName } from "@/lib/names";
 import { daysLate, formatShortDate } from "@/lib/dates";
 
 type Step = "signin" | "loans" | "confirm" | "success";

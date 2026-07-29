@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { clearFailures, lockoutRemainingMs, recordFailure } from "./pin-attempts";
 
 export type PinVerification =
-  | { status: "ok"; member: { id: string; full_name: string } }
+  | { status: "ok"; member: { id: string; full_name: string; email: string } }
   | { status: "locked"; retryAfterSeconds: number }
   | { status: "bad-pin" }
   | { status: "not-found" };
@@ -26,7 +26,7 @@ export async function verifyMemberPin(
 
   const { data: member } = await supabase
     .from("members")
-    .select("id, full_name, pin_hash, is_active")
+    .select("id, full_name, email, pin_hash, is_active")
     .eq("id", memberId)
     .maybeSingle();
 
@@ -43,5 +43,8 @@ export async function verifyMemberPin(
   }
 
   clearFailures(memberId);
-  return { status: "ok", member: { id: member.id, full_name: member.full_name } };
+  return {
+    status: "ok",
+    member: { id: member.id, full_name: member.full_name, email: member.email },
+  };
 }
