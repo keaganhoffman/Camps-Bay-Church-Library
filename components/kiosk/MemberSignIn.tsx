@@ -101,6 +101,9 @@ export default function MemberSignIn({
           </button>
         ))}
       </div>
+      <Link href="/" className="link-btn">
+        Back to start
+      </Link>
     </>
   );
 }

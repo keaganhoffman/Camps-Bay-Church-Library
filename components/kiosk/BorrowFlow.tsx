@@ -137,6 +137,9 @@ export default function BorrowFlow() {
             </button>
           ))}
         </div>
+        <Link href="/" className="link-btn">
+          Back to start
+        </Link>
       </>
     );
   }
