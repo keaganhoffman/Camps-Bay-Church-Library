@@ -10,8 +10,8 @@ kiosk, an admin area, and automated email reminders.
 | Phase | What | Status |
 | ----- | ---- | ------ |
 | 1 | Project scaffold, database schema, seed data | ✅ |
-| 2 | Kiosk borrow flow | ✅ this branch |
-| 3 | Kiosk return flow + idle reset | — |
+| 2 | Kiosk borrow flow | ✅ |
+| 3 | Kiosk return flow + idle reset | ✅ this branch |
 | 4 | Receipt + thank-you emails (Resend) | — |
 | 5 | Daily cron: due-soon + overdue emails | — |
 | 6 | Admin area (PIN gate, CRUD, CSV import) | — |
@@ -73,8 +73,23 @@ With `.env.local` filled in and `npm run dev` running, open
 6. Check [/status](http://localhost:3000/status): that book's shelf count is
    now one lower. The loan row is in Supabase under **Table Editor → loans**.
 
-No emails are sent yet — that's Phase 4. Returns are Phase 3 (the Return
-button shows a friendly placeholder for now).
+No emails are sent yet — that's Phase 4.
+
+## Testing Phase 3 (returns + idle reset)
+
+1. Borrow a book first (see above) so there's something to return.
+2. From Welcome, tap **Return a book**, sign in as the same member (PIN
+   **1234**). You'll see that member's open loans, each with a blue
+   **Due 28 Aug**-style badge — or a red **N days late** badge if overdue.
+3. Tap the book, confirm, and you'll get the **Thank you** screen ("you're
+   all square" if nothing else is out). The shelf count on
+   [/status](http://localhost:3000/status) goes back up, and the loan row in
+   Supabase now has a `returned_at` timestamp.
+4. To see an **overdue** badge: in Supabase **Table Editor → loans**, edit an
+   open loan's `due_at` to a date in the past, then run the return flow again.
+5. **Idle reset**: on any screen except Welcome, walk away for 60 seconds —
+   the kiosk returns to Welcome by itself and forgets everything (any touch
+   or keypress restarts the 60-second clock).
 
 ## How the pieces fit
 

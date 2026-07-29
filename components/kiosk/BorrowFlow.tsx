@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import PinPad from "./PinPad";
+import MemberSignIn, { type Member } from "./MemberSignIn";
 import { dueDateFromNow, formatFriendlyDate } from "@/lib/dates";
 
-type Step = "member" | "pin" | "book" | "confirm" | "success";
-type Member = { id: string; full_name: string };
+type Step = "signin" | "book" | "confirm" | "success";
 type Book = { id: string; title: string; author: string; on_shelf: number };
 type CheckoutResult = {
   bookTitle: string;
@@ -16,16 +15,9 @@ type CheckoutResult = {
   copiesLeft: number;
 };
 
-function firstName(fullName: string): string {
-  return fullName.split(" ")[0];
-}
-
 export default function BorrowFlow() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("member");
-
-  const [members, setMembers] = useState<Member[] | null>(null);
-  const [memberSearch, setMemberSearch] = useState("");
+  const [step, setStep] = useState<Step>("signin");
   const [member, setMember] = useState<Member | null>(null);
 
   // Kept in memory only while the flow is open; the server re-verifies
@@ -42,13 +34,6 @@ export default function BorrowFlow() {
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/kiosk/members", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => setMembers(data.members))
-      .catch(() => setLoadError("Couldn't load the member list. Is the database connected?"));
-  }, []);
-
   // Fetches a fresh book list (so on-shelf counts are current) and
   // moves to the book step. Called on sign-in and "choose another".
   function goToBookStep() {
@@ -58,26 +43,6 @@ export default function BorrowFlow() {
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => setBooks(data.books))
       .catch(() => setLoadError("Couldn't load the book list."));
-  }
-
-  async function verifyPin(entered: string): Promise<string | null> {
-    if (!member) return "Something went wrong — start again.";
-    const res = await fetch("/api/kiosk/verify-pin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ memberId: member.id, pin: entered }),
-    });
-    if (res.ok) {
-      setPin(entered);
-      goToBookStep();
-      return null;
-    }
-    if (res.status === 423) {
-      const data = await res.json().catch(() => null);
-      const minutes = Math.max(1, Math.ceil((data?.retryAfterSeconds ?? 300) / 60));
-      return `Too many attempts. Please try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
-    }
-    return "That PIN isn't right — try again.";
   }
 
   async function confirmBorrow() {
@@ -114,62 +79,16 @@ export default function BorrowFlow() {
     );
   }
 
-  if (step === "member") {
-    const filtered = (members ?? []).filter((m) =>
-      m.full_name.toLowerCase().includes(memberSearch.trim().toLowerCase())
-    );
+  if (step === "signin") {
     return (
-      <>
-        <h1>Who&apos;s borrowing?</h1>
-        <p className="lede">Find your name, then enter your PIN.</p>
-        <input
-          type="search"
-          className="kiosk-search"
-          placeholder="Search your name…"
-          value={memberSearch}
-          onChange={(e) => setMemberSearch(e.target.value)}
-          autoFocus
-        />
-        <div className="kiosk-list">
-          {members === null && <p className="sub list-note">Loading members…</p>}
-          {members !== null && filtered.length === 0 && (
-            <p className="sub list-note">No one found — try fewer letters.</p>
-          )}
-          {filtered.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className="kiosk-row"
-              onClick={() => {
-                setMember(m);
-                setStep("pin");
-              }}
-            >
-              {m.full_name}
-            </button>
-          ))}
-        </div>
-      </>
-    );
-  }
-
-  if (step === "pin" && member) {
-    return (
-      <>
-        <h1>Hi, {firstName(member.full_name)}</h1>
-        <p className="lede">Enter your 4-digit PIN.</p>
-        <PinPad onSubmit={verifyPin} />
-        <button
-          type="button"
-          className="link-btn"
-          onClick={() => {
-            setMember(null);
-            setStep("member");
-          }}
-        >
-          Not you? Go back
-        </button>
-      </>
+      <MemberSignIn
+        heading="Who's borrowing?"
+        onSignedIn={(m, enteredPin) => {
+          setMember(m);
+          setPin(enteredPin);
+          goToBookStep();
+        }}
+      />
     );
   }
 
