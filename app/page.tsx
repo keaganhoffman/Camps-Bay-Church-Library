@@ -5,6 +5,9 @@ export default function WelcomePage() {
   return (
     <main className="kiosk-page welcome-page">
       <div className="welcome-inner">
+        {/* eslint-disable-next-line @next/next/no-img-element -- small local
+            static asset; the image optimizer adds nothing here */}
+        <img src="/photos/church-logo.png" alt="" className="welcome-photo" />
         <h1>Christian Life Camps Bay</h1>
         <p className="welcome-subtitle">Church Library</p>
         <div className="welcome-actions">

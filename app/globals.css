@@ -157,6 +157,15 @@ code {
   margin: auto 0;
 }
 
+.welcome-photo {
+  display: block;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 28px;
+}
+
 .welcome-subtitle {
   color: var(--ink-secondary);
   font-size: 22px;
