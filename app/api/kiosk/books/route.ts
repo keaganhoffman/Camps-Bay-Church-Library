@@ -10,6 +10,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("books_with_availability")
     .select("id, title, author, on_shelf")
+    .eq("is_active", true) // deactivated books never appear on the kiosk
     .order("title");
 
   if (error) {

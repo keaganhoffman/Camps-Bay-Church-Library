@@ -1,18 +1,37 @@
 import Link from "next/link";
-import IdleRedirect from "@/components/kiosk/IdleRedirect";
 
-// Placeholder — the real admin area (behind the 6-digit PIN) arrives in Phase 6.
-export default function AdminPage() {
+// Admin dashboard (the PIN gate lives in the layout).
+export default function AdminHomePage() {
   return (
-    <main className="kiosk-page">
-      <IdleRedirect seconds={60} />
-      <div className="kiosk-card">
-        <h1>Admin</h1>
-        <p className="lede">The admin area arrives in Phase 6.</p>
-        <Link href="/" className="big-btn" style={{ marginTop: 24 }}>
-          Back to start
+    <>
+      <h1>Admin</h1>
+      <p className="lede">What would you like to manage?</p>
+      <div className="kiosk-list">
+        <Link href="/admin/books" className="kiosk-row admin-link-row">
+          <span>
+            Books
+            <span className="sub"> · add, edit, import your catalogue</span>
+          </span>
         </Link>
+        <Link href="/admin/members" className="kiosk-row admin-link-row">
+          <span>
+            Members
+            <span className="sub"> · add, edit, reset PINs, import</span>
+          </span>
+        </Link>
+        <Link href="/admin/loans" className="kiosk-row admin-link-row">
+          <span>
+            Loans
+            <span className="sub"> · everything currently out, overdue filter</span>
+          </span>
+        </Link>
+        <div className="kiosk-row admin-link-row disabled">
+          <span>
+            Stock count
+            <span className="sub"> · arrives in Phase 7</span>
+          </span>
+        </div>
       </div>
-    </main>
+    </>
   );
 }

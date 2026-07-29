@@ -13,8 +13,8 @@ kiosk, an admin area, and automated email reminders.
 | 2 | Kiosk borrow flow | ✅ |
 | 3 | Kiosk return flow + idle reset | ✅ |
 | 4 | Receipt + thank-you emails (Resend) | ✅ |
-| 5 | Daily cron: due-soon + overdue emails | ✅ this branch |
-| 6 | Admin area (PIN gate, CRUD, CSV import) | — |
+| 5 | Daily cron: due-soon + overdue emails | ✅ |
+| 6 | Admin area (PIN gate, CRUD, CSV import) | ✅ this branch |
 | 7 | Stock count | — |
 | 8 | Polish, PWA, deploy | — |
 
@@ -159,6 +159,28 @@ What you should see:
   ever per loan; overdue at most once per day (it would send again tomorrow).
 - Clean up afterwards: return both books via the kiosk, or delete the two
   loan rows in Table Editor.
+
+## Testing Phase 6 (admin area)
+
+One-time setup — run the migration: Supabase → **SQL Editor** → paste the
+contents of [`supabase/migrations/002_admin.sql`](supabase/migrations/002_admin.sql)
+→ Run. (Adds the ability to hide a book from the kiosk.)
+
+Then on the site, tap the small **Admin** link in the Welcome footer and
+enter PIN **123456**:
+
+- **Books** — add one, edit it, **Hide** it (check it vanishes from the
+  kiosk borrow list), Show it again. Try the import box: paste a couple of
+  rows like `New Book Title, Some Author, 2` and Import. Re-import the same
+  rows — they're skipped as duplicates.
+- **Members** — add someone, edit them, **Reset PIN** (then sign in on the
+  kiosk with the new PIN), Deactivate (they disappear from kiosk sign-in).
+  Import expects `full_name, email, pin` rows.
+- **Loans** — everything currently out with due badges, an overdue-only
+  filter, and **Mark returned** for books left at the desk (no email is
+  sent for desk returns).
+- The admin session lasts 1 hour (then the PIN is asked again); 5 minutes
+  of inactivity returns the iPad to the Welcome screen.
 
 ## How the pieces fit
 
