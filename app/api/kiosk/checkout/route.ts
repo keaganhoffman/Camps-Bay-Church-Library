@@ -30,6 +30,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "not-authorised" }, { status: 401 });
   }
 
+  // Loan limit: 3 books out at a time keeps the collection moving.
+  const { count: openCount } = await supabase
+    .from("loans")
+    .select("id", { count: "exact", head: true })
+    .eq("member_id", memberId)
+    .is("returned_at", null);
+  if ((openCount ?? 0) >= 3) {
+    return NextResponse.json({ error: "loan-limit" }, { status: 409 });
+  }
+
   // Is a copy still on the shelf? (Someone could have taken the last
   // one while this borrower was deciding.)
   const { data: book, error: bookError } = await supabase

@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MemberSignIn, { type Member } from "./MemberSignIn";
+import AutoHome from "./AutoHome";
 import { dueDateFromNow, formatFriendlyDate } from "@/lib/dates";
+import { colorIndex } from "@/lib/names";
 
 type Step = "signin" | "book" | "confirm" | "success";
 type Book = { id: string; title: string; author: string; on_shelf: number };
@@ -61,7 +63,14 @@ export default function BorrowFlow() {
       return;
     }
     if (res.status === 409) {
-      setConfirmError("Sorry — the last copy has just gone out. Please choose another book.");
+      const data = await res.json().catch(() => null);
+      if (data?.error === "loan-limit") {
+        setConfirmError(
+          "You've already got 3 books out — bring one back first, then this one's yours."
+        );
+      } else {
+        setConfirmError("Sorry — the last copy has just gone out. Please choose another book.");
+      }
       return;
     }
     setConfirmError("Something went wrong saving the loan. Please try again.");
@@ -128,9 +137,14 @@ export default function BorrowFlow() {
                 setStep("confirm");
               }}
             >
-              <span className="book-title">
-                {b.title}
-                <span className="sub"> · {b.author}</span>
+              <span className="row-left book-title">
+                <span className={`avatar avatar-${colorIndex(b.title, 6)}`}>
+                  {b.title[0]?.toUpperCase()}
+                </span>
+                <span>
+                  {b.title}
+                  <span className="sub"> · {b.author}</span>
+                </span>
               </span>
               {b.on_shelf > 0 ? (
                 <span className="badge ok">On shelf · {b.on_shelf}</span>
@@ -193,6 +207,7 @@ export default function BorrowFlow() {
         <button type="button" className="big-btn primary" onClick={() => router.push("/")}>
           Done
         </button>
+        <AutoHome seconds={8} />
       </div>
     );
   }

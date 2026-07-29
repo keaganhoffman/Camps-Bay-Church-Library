@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PinPad from "./PinPad";
-import { firstName } from "@/lib/names";
+import { firstName, initials, colorIndex } from "@/lib/names";
 
 export type Member = { id: string; full_name: string };
+
+const AVATAR_BUCKETS = 6;
 
 // Shared sign-in for both kiosk flows: searchable member list, then
 // the PIN pad. Calls onSignedIn(member, pin) once the server has
@@ -74,8 +76,31 @@ export default function MemberSignIn({
     );
   }
 
+  const searching = search.trim().length > 0;
   const filtered = (members ?? []).filter((m) =>
     m.full_name.toLowerCase().includes(search.trim().toLowerCase())
+  );
+
+  // A–Z sections (only while browsing — search results stay flat).
+  const groups: [string, Member[]][] = [];
+  if (!searching) {
+    for (const m of filtered) {
+      const letter = /^[a-z]/i.test(m.full_name) ? m.full_name[0].toUpperCase() : "#";
+      const last = groups[groups.length - 1];
+      if (last && last[0] === letter) last[1].push(m);
+      else groups.push([letter, [m]]);
+    }
+  }
+
+  const memberRow = (m: Member) => (
+    <button key={m.id} type="button" className="kiosk-row" onClick={() => setMember(m)}>
+      <span className="row-left">
+        <span className={`avatar avatar-${colorIndex(m.full_name, AVATAR_BUCKETS)}`}>
+          {initials(m.full_name)}
+        </span>
+        {m.full_name}
+      </span>
+    </button>
   );
 
   return (
@@ -91,18 +116,25 @@ export default function MemberSignIn({
         placeholder="Search your name…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        autoFocus
       />
       <div className="kiosk-list">
         {members === null && <p className="sub list-note">Loading members…</p>}
         {members !== null && filtered.length === 0 && (
-          <p className="sub list-note">No one found — try fewer letters.</p>
+          <div className="list-note">
+            <p className="sub">No one found by that name.</p>
+            <Link href="/join" className="link-btn" style={{ margin: "8px 0 0" }}>
+              Can&apos;t find your name? Create an account
+            </Link>
+          </div>
         )}
-        {filtered.map((m) => (
-          <button key={m.id} type="button" className="kiosk-row" onClick={() => setMember(m)}>
-            {m.full_name}
-          </button>
-        ))}
+        {searching
+          ? filtered.map(memberRow)
+          : groups.map(([letter, ms]) => (
+              <div key={letter}>
+                <div className="kiosk-letter">{letter}</div>
+                {ms.map(memberRow)}
+              </div>
+            ))}
       </div>
     </>
   );

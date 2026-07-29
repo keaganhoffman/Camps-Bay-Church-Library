@@ -276,6 +276,27 @@ and redeploy.
 3. In Settings → **Display & Brightness → Auto-Lock**, choose **Never**
    while the kiosk is on duty (and plug the iPad in).
 
+## Improvements batch (post-launch)
+
+One migration to run: Supabase → SQL Editor → paste
+[`supabase/migrations/003_lost_books.sql`](supabase/migrations/003_lost_books.sql) → Run.
+
+What changed:
+
+- **Overdue emails cap at 14** per loan (two weeks), then stop — long-gone
+  books become the librarian's job, via **Admin → Loans → Mark lost** (shows
+  on overdue loans; closes the loan, cuts the book's stock by one, records
+  it as lost for reports).
+- **Loan limit of 3** open books per member, with a friendly kiosk message.
+- **Admin → Members → History** shows any member's full borrowing record.
+- **Admin → Reports**: headline stats, most-borrowed and never-borrowed
+  titles, borrows by month, and CSV downloads of books/members/loans
+  (a handy monthly backup — no PINs ever exported).
+- Kiosk polish: success screens return to Welcome by themselves after ~8
+  seconds; empty member searches offer "Create an account"; the member list
+  has sticky A–Z headers and coloured initial badges; the search box no
+  longer pops the keyboard automatically.
+
 ## How the pieces fit
 
 - `supabase/schema.sql` — the database: members, books, loans, email_log,

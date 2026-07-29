@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from "react";
 import CsvImport from "./CsvImport";
+import { daysLate, formatShortDate } from "@/lib/dates";
 
 type AdminMember = {
   id: string;
   full_name: string;
   email: string;
   is_active: boolean;
+};
+
+type HistoryLoan = {
+  id: string;
+  title: string;
+  borrowedLabel: string;
+  badge: { label: string; tone: "accent" | "error" | "out" | "ok" };
 };
 
 export default function MembersAdmin() {
@@ -26,6 +34,10 @@ export default function MembersAdmin() {
   const [editEmail, setEditEmail] = useState("");
   const [pinResetId, setPinResetId] = useState<string | null>(null);
   const [resetPin, setResetPin] = useState("");
+
+  // Borrowing history, expanded inline under one member at a time.
+  const [historyId, setHistoryId] = useState<string | null>(null);
+  const [historyLoans, setHistoryLoans] = useState<HistoryLoan[] | null>(null);
 
   function load() {
     fetch("/api/admin/members", { cache: "no-store" })
@@ -74,6 +86,48 @@ export default function MembersAdmin() {
     if (await patchMember(id, { full_name: editName, email: editEmail })) {
       setEditingId(null);
     }
+  }
+
+  async function toggleHistory(id: string) {
+    if (historyId === id) {
+      setHistoryId(null);
+      return;
+    }
+    setHistoryId(id);
+    setHistoryLoans(null);
+    const res = await fetch(`/api/admin/members/${id}/loans`, { cache: "no-store" });
+    if (!res.ok) {
+      setMessage("Couldn't load that member's history.");
+      setHistoryId(null);
+      return;
+    }
+    const data = await res.json();
+    setHistoryLoans(
+      (
+        data.loans as {
+          id: string;
+          title: string;
+          borrowed_at: string;
+          due_at: string;
+          returned_at: string | null;
+          lost: boolean;
+        }[]
+      ).map((l) => {
+        let badge: HistoryLoan["badge"];
+        if (l.lost) badge = { label: "lost", tone: "out" };
+        else if (l.returned_at)
+          badge = { label: `returned ${formatShortDate(l.returned_at)}`, tone: "ok" };
+        else if (daysLate(l.due_at) > 0)
+          badge = { label: `${daysLate(l.due_at)} days late`, tone: "error" };
+        else badge = { label: `due ${formatShortDate(l.due_at)}`, tone: "accent" };
+        return {
+          id: l.id,
+          title: l.title,
+          borrowedLabel: formatShortDate(l.borrowed_at),
+          badge,
+        };
+      })
+    );
   }
 
   async function savePinReset(id: string) {
@@ -206,12 +260,16 @@ export default function MembersAdmin() {
             );
           }
           return (
-            <div className="admin-row" key={m.id}>
+            <div key={m.id}>
+            <div className="admin-row">
               <span className="grow">
                 {m.full_name}
                 <span className="sub"> · {m.email}</span>
                 {!m.is_active && <span className="badge out"> Deactivated</span>}
               </span>
+              <button type="button" className="btn ghost" onClick={() => toggleHistory(m.id)}>
+                {historyId === m.id ? "Hide history" : "History"}
+              </button>
               <button
                 type="button"
                 className="btn ghost"
@@ -252,6 +310,24 @@ export default function MembersAdmin() {
                   Reactivate
                 </button>
               )}
+            </div>
+            {historyId === m.id && (
+              <div className="history-block">
+                {historyLoans === null && <p className="sub">Loading history…</p>}
+                {historyLoans !== null && historyLoans.length === 0 && (
+                  <p className="sub">No loans yet.</p>
+                )}
+                {(historyLoans ?? []).map((l) => (
+                  <div className="history-row" key={l.id}>
+                    <span className="grow">
+                      {l.title}
+                      <span className="sub"> · borrowed {l.borrowedLabel}</span>
+                    </span>
+                    <span className={`badge ${l.badge.tone}`}>{l.badge.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
           );
         })}

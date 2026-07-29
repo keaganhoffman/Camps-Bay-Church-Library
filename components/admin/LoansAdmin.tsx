@@ -50,6 +50,20 @@ export default function LoansAdmin() {
     }
   }
 
+  async function markLost(loan: AdminLoan) {
+    const sure = window.confirm(
+      `Mark "${loan.book_title}" (${loan.member_name}) as LOST?\n\n` +
+        "This closes the loan, reduces the book's stock by one, and stops the overdue emails."
+    );
+    if (!sure) return;
+    const res = await fetch(`/api/admin/loans/${loan.id}/lost`, { method: "POST" });
+    if (res.ok) {
+      load();
+    } else {
+      setMessage("Couldn't mark it lost — refresh and try again.");
+    }
+  }
+
   const shown = (loans ?? []).filter((l) => !overdueOnly || l.badge.late);
   const overdueCount = (loans ?? []).filter((l) => l.badge.late).length;
 
@@ -88,6 +102,11 @@ export default function LoansAdmin() {
             <button type="button" className="btn ghost" onClick={() => markReturned(l)}>
               Mark returned
             </button>
+            {l.badge.late && (
+              <button type="button" className="btn ghost danger" onClick={() => markLost(l)}>
+                Mark lost
+              </button>
+            )}
           </div>
         ))}
       </div>

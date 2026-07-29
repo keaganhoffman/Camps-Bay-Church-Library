@@ -633,3 +633,98 @@ code {
 .signup-pins .kiosk-field {
   flex: 1;
 }
+
+/* --- List avatars + A-Z sections ---------------------------- */
+
+.row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.avatar {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.avatar-0 { background: #e8f1f5; color: #0b6b8d; }
+.avatar-1 { background: #eaf6ee; color: #248a3d; }
+.avatar-2 { background: #fdf2e3; color: #a06a14; }
+.avatar-3 { background: #f1ecf8; color: #6b4fa0; }
+.avatar-4 { background: #fceceb; color: #a84034; }
+.avatar-5 { background: #edeff4; color: #4a5568; }
+
+.kiosk-letter {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 20px;
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  letter-spacing: 0.06em;
+}
+
+/* --- Success auto-return note ------------------------------- */
+
+.auto-home-note {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+
+/* --- Member history (admin) --------------------------------- */
+
+.history-block {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+  padding: 10px 20px 14px 36px;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 15px;
+}
+
+/* --- Report tiles ------------------------------------------- */
+
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat-tile {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--ink-secondary);
+  margin-top: 2px;
+}
+
+.badge.ok { background: #eaf6ee; color: var(--success); }

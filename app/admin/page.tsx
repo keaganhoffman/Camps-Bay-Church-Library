@@ -31,6 +31,12 @@ export default function AdminHomePage() {
             <span className="sub"> · monthly shelf check with adjustments</span>
           </span>
         </Link>
+        <Link href="/admin/reports" className="kiosk-row admin-link-row">
+          <span>
+            Reports
+            <span className="sub"> · stats, popular titles, data downloads</span>
+          </span>
+        </Link>
       </div>
     </>
   );

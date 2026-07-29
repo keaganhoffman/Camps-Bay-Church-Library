@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MemberSignIn, { type Member } from "./MemberSignIn";
+import AutoHome from "./AutoHome";
 import { firstName } from "@/lib/names";
 import { daysLate, formatShortDate } from "@/lib/dates";
 
@@ -189,6 +190,7 @@ export default function ReturnFlow() {
         <button type="button" className="big-btn primary" onClick={() => router.push("/")}>
           Done
         </button>
+        <AutoHome seconds={8} />
       </div>
     );
   }
