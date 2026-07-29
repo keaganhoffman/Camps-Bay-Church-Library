@@ -15,8 +15,8 @@ kiosk, an admin area, and automated email reminders.
 | 4 | Receipt + thank-you emails (Resend) | ✅ |
 | 5 | Daily cron: due-soon + overdue emails | ✅ |
 | 6 | Admin area (PIN gate, CRUD, CSV import) | ✅ |
-| 7 | Stock count | ✅ this branch |
-| 8 | Polish, PWA, deploy | — |
+| 7 | Stock count | ✅ |
+| 8 | Polish, PWA, deploy | ✅ this branch |
 
 ## Phase 1 setup (do this once)
 
@@ -200,6 +200,81 @@ No new SQL needed — the tables have existed since Phase 1.
 
 Note: a book's *expected* number counts only copies that should be on the
 shelf — books currently out on loan are not part of the count.
+
+## Phase 8 — going live
+
+Work through this checklist in order.
+
+### 1. Clean out the test data
+
+In Supabase **SQL Editor** — this deletes every test member, book, loan and
+email record (order matters because of the table links):
+
+```sql
+delete from email_log;
+delete from stock_count_lines;
+delete from stock_counts;
+delete from loans;
+delete from members;
+delete from books;
+```
+
+### 2. Import the real library
+
+Prepare two spreadsheets (templates with the exact column layout are in
+[`templates/`](templates/)):
+
+- **Books**: `title, author, stock_total` — one row per title.
+- **Members**: `full_name, email, pin` — pick a 4-digit PIN per member
+  (or let people choose; PINs are stored only as bcrypt hashes).
+
+Then **Admin → Books → Import** and **Admin → Members → Import** (a `.csv`
+file, or paste rows straight from Excel). Both skip duplicates, so you can
+import in batches.
+
+### 3. Set a real admin PIN
+
+The seeded admin PIN (123456) is public knowledge now. In the SQL Editor,
+pick your own 6 digits:
+
+```sql
+update admin_settings
+set admin_pin_hash = crypt('YOUR6DIGITS', gen_salt('bf', 10))
+where id;
+```
+
+### 4. Verify a sending domain in Resend
+
+Until this step, emails only deliver to the Resend account owner.
+
+1. Resend dashboard → **Domains → Add Domain** → enter a domain the church
+   controls (e.g. `campsbaychurch.org`, or a subdomain like
+   `mail.campsbaychurch.org`).
+2. Resend shows 3–4 DNS records (SPF/DKIM). Add them wherever the domain's
+   DNS is managed, then click **Verify** (can take up to an hour).
+3. In Vercel → Environment Variables, add
+   `EMAIL_FROM` = `Christian Life Camps Bay Library <library@campsbaychurch.org>`
+   (any address at the verified domain), then redeploy.
+
+### 5. Rotate the secrets
+
+The test values for `CRON_SECRET` and `RESEND_API_KEY` appeared in chat
+during development. Make a fresh long random `CRON_SECRET`, create a new
+Resend API key (and delete the old one in Resend), update both in Vercel,
+and redeploy.
+
+### 6. Set up the iPad
+
+1. Open the site in **Safari** on the iPad → **Share** button →
+   **Add to Home Screen** → name it "Library". Opening from that icon runs
+   full-screen, no browser bars.
+2. **Guided Access** locks the iPad to the app during library hours:
+   Settings → **Accessibility → Guided Access** → turn on, set a passcode
+   (this is the "get out" code — not the admin PIN). Then open the Library
+   app and **triple-click the side/home button** to start Guided Access.
+   Triple-click again + passcode ends it.
+3. In Settings → **Display & Brightness → Auto-Lock**, choose **Never**
+   while the kiosk is on duty (and plug the iPad in).
 
 ## How the pieces fit
 
