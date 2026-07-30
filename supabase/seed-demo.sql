@@ -38,6 +38,14 @@ from (values
   ('Ruan Nel'), ('Precious Zulu')
 ) as v(full_name);
 
+-- Two real people with real inboxes (PIN 1234 like everyone else) —
+-- used to show live emails during demos. Everyone else stays on fake
+-- @example.com addresses on purpose.
+insert into members (full_name, email, pin_hash) values
+  ('Wayne Sandeman', 'wayne@christianlifecb.com', crypt('1234', gen_salt('bf', 10))),
+  ('Keagan Hoffman', 'keagan.hoffman@gmail.com', crypt('1234', gen_salt('bf', 10)))
+on conflict (email) do nothing;
+
 -- ---- books --------------------------------------------------
 insert into books (title, author, stock_total) values
   ('Mere Christianity', 'C.S. Lewis', 3),
