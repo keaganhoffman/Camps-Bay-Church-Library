@@ -14,6 +14,10 @@
 --   1 past stock count with 2 discrepancies
 -- ============================================================
 
+-- ---- make sure migration 003 is applied --------------------
+-- (safe if it already is)
+alter table loans add column if not exists lost_at timestamptz;
+
 -- ---- wipe ---------------------------------------------------
 delete from email_log;
 delete from stock_count_lines;
