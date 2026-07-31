@@ -755,3 +755,16 @@ code {
   color: var(--accent);
   margin: 10px 0;
 }
+
+.admin-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.admin-form-header h2 {
+  margin-bottom: 0;
+}

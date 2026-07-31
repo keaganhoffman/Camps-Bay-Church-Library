@@ -158,13 +158,26 @@ export default function BooksAdmin() {
       <p className="lede">Add, edit, hide from the kiosk, or import in bulk.</p>
 
       <form className="card admin-form" onSubmit={addBook}>
-        <h2>Add a book</h2>
+        <div className="admin-form-header">
+          <h2>Add a book</h2>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setScanning(true);
+              setScanKey((k) => k + 1);
+              setMessage(null);
+            }}
+          >
+            {lookingUp ? "Looking up…" : "📷 Scan barcode"}
+          </button>
+        </div>
         {scanning && (
           <div className="scan-card" style={{ marginBottom: 14 }}>
             <BarcodeScanner
               key={scanKey}
               onDetected={handleAddScan}
-              hint="Scan the ISBN — title and author fill in automatically"
+              hint="Scan the ISBN on the back cover — the barcode fills in below, and we try to fill the title and author too"
             />
             <button type="button" className="btn ghost" onClick={() => setScanning(false)}>
               Close camera
@@ -201,16 +214,6 @@ export default function BooksAdmin() {
             value={newBarcode}
             onChange={(e) => setNewBarcode(e.target.value)}
           />
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => {
-              setScanning(true);
-              setScanKey((k) => k + 1);
-            }}
-          >
-            {lookingUp ? "Looking up…" : "Scan"}
-          </button>
           <button type="submit" className="btn">
             Add
           </button>
