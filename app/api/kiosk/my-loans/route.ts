@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from("loans")
-    .select("id, due_at, books(title, author)")
+    .select("id, due_at, books(title, author, barcode)")
     .eq("member_id", memberId)
     .is("returned_at", null)
     .order("due_at");
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       due_at: loan.due_at,
       title: book?.title ?? "Unknown book",
       author: book?.author ?? "",
+      barcode: book?.barcode ?? null,
     };
   });
 

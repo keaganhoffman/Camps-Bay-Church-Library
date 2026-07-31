@@ -24,6 +24,10 @@ export async function PATCH(
     updates.stock_total = stockTotal;
   }
   if (typeof body?.is_active === "boolean") updates.is_active = body.is_active;
+  if (typeof body?.barcode === "string") {
+    // Empty string clears the barcode.
+    updates.barcode = body.barcode.trim() || null;
+  }
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
@@ -31,6 +35,14 @@ export async function PATCH(
 
   const supabase = createServiceClient();
   const { error } = await supabase.from("books").update(updates).eq("id", id);
-  if (error) return NextResponse.json({ error: "Couldn't update the book" }, { status: 500 });
+  if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "Another book already has that barcode" },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json({ error: "Couldn't update the book" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

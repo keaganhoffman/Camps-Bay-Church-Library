@@ -297,6 +297,26 @@ What changed:
   has sticky A–Z headers and coloured initial badges; the search box no
   longer pops the keyboard automatically.
 
+## Barcode scanning
+
+Run migration [`004_barcodes.sql`](supabase/migrations/004_barcodes.sql)
+(Supabase → SQL Editor → paste → Run) — it adds an optional `barcode`
+column for the ISBN on each book's back cover.
+
+- **Kiosk**: the borrow flow's book step and the return flow's loan list
+  open the camera — scan the ISBN and go straight to the confirmation.
+  Search/tap remains underneath as the failsafe, and books without
+  barcodes work exactly as before.
+- **Admin → Books**: a Scan button on the add form captures the ISBN and
+  auto-fills title/author from Open Library (check, set copies, Add).
+  Barcodes can also be typed/edited per book, and the CSV import accepts
+  an optional 4th `barcode` column. Books missing one show a small
+  "no barcode" tag.
+- **iPad note**: the first scan asks for camera permission — tap Allow.
+  If it was declined, re-enable under Settings → Apps → Safari → Camera
+  (or the site's own permissions), and the scanner works inside Guided
+  Access.
+
 ## How the pieces fit
 
 - `supabase/schema.sql` — the database: members, books, loans, email_log,

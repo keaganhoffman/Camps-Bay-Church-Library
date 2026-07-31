@@ -728,3 +728,30 @@ code {
 }
 
 .badge.ok { background: #eaf6ee; color: var(--success); }
+
+/* --- Barcode scanner ---------------------------------------- */
+
+.scan-card {
+  padding: 16px;
+  text-align: center;
+}
+
+.scanner-video {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #111;
+  margin: 0 auto;
+  display: block;
+}
+
+.scanner-hint {
+  margin-top: 10px;
+}
+
+.scan-message {
+  color: var(--accent);
+  margin: 10px 0;
+}

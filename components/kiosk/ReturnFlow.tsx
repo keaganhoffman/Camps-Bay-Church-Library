@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import MemberSignIn, { type Member } from "./MemberSignIn";
 import AutoHome from "./AutoHome";
+import BarcodeScanner from "./BarcodeScanner";
 import { firstName } from "@/lib/names";
 import { daysLate, formatShortDate } from "@/lib/dates";
 
@@ -15,6 +16,7 @@ type Loan = {
   id: string;
   title: string;
   author: string;
+  barcode: string | null;
   badge: { label: string; late: boolean };
 };
 
@@ -34,6 +36,10 @@ export default function ReturnFlow() {
   const [result, setResult] = useState<ReturnResult | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const [scanKey, setScanKey] = useState(0);
+  const [scanDone, setScanDone] = useState(false);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
+
   function signedIn(m: Member, enteredPin: string) {
     setMember(m);
     setPin(enteredPin);
@@ -46,13 +52,20 @@ export default function ReturnFlow() {
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         const withBadges = (
-          data.loans as { id: string; title: string; author: string; due_at: string }[]
+          data.loans as {
+            id: string;
+            title: string;
+            author: string;
+            barcode: string | null;
+            due_at: string;
+          }[]
         ).map((l) => {
           const late = daysLate(l.due_at);
           return {
             id: l.id,
             title: l.title,
             author: l.author,
+            barcode: l.barcode,
             badge:
               late > 0
                 ? { label: `${late} day${late === 1 ? "" : "s"} late`, late: true }
@@ -62,6 +75,24 @@ export default function ReturnFlow() {
         setLoans(withBadges);
       })
       .catch(() => setLoadError("Couldn't load your loans. Please try again."));
+  }
+
+  function chooseLoan(l: Loan) {
+    setLoan(l);
+    setConfirmError(null);
+    setStep("confirm");
+  }
+
+  function handleScan(code: string) {
+    setScanDone(true);
+    const match = (loans ?? []).find((l) => l.barcode === code);
+    if (!match) {
+      setScanMessage(
+        "That barcode doesn't match any of your books — tap it in the list below, or scan again."
+      );
+      return;
+    }
+    chooseLoan(match);
   }
 
   async function confirmReturn() {
@@ -105,8 +136,29 @@ export default function ReturnFlow() {
           <span className="chevron">‹</span> Back
         </Link>
         <h1>Welcome back, {firstName(member.full_name)}</h1>
-        <p className="lede">Which book are you returning?</p>
-        <div className="kiosk-list">
+        <p className="lede">Scan the book you&apos;re returning, or tap it in the list.</p>
+
+        {loans !== null && loans.length > 0 && (
+          <div className="kiosk-card scan-card">
+            {!scanDone && <BarcodeScanner key={scanKey} onDetected={handleScan} />}
+            {scanMessage && <p className="scan-message">{scanMessage}</p>}
+            {scanDone && (
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={() => {
+                  setScanDone(false);
+                  setScanMessage(null);
+                  setScanKey((k) => k + 1);
+                }}
+              >
+                Scan again
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="kiosk-list" style={{ marginTop: 16 }}>
           {loans === null && <p className="sub list-note">Loading your books…</p>}
           {loans !== null && loans.length === 0 && (
             <p className="sub list-note">
@@ -118,11 +170,7 @@ export default function ReturnFlow() {
               key={l.id}
               type="button"
               className="kiosk-row book-row"
-              onClick={() => {
-                setLoan(l);
-                setConfirmError(null);
-                setStep("confirm");
-              }}
+              onClick={() => chooseLoan(l)}
             >
               <span className="book-title">
                 {l.title}
