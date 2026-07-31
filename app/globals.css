@@ -768,3 +768,10 @@ code {
 .admin-form-header h2 {
   margin-bottom: 0;
 }
+
+.scan-duplicate {
+  background: var(--accent-soft);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}

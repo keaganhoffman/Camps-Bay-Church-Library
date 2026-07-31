@@ -49,6 +49,9 @@ export default function BooksAdmin() {
   const [scanning, setScanning] = useState(false);
   const [scanKey, setScanKey] = useState(0);
   const [lookingUp, setLookingUp] = useState(false);
+  // Set when a scan matches a book already in the catalogue — the
+  // right move is then "+1 copy", not a duplicate entry.
+  const [existingMatch, setExistingMatch] = useState<AdminBook | null>(null);
 
   // Inline edit
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -91,10 +94,18 @@ export default function BooksAdmin() {
     }
   }
 
-  // Scan into the add form: barcode fills in, and if title/author are
-  // still empty we try Open Library for them.
+  // Scan into the add form. If the barcode is already catalogued this
+  // becomes "add another copy"; otherwise the barcode fills in and we
+  // try Open Library for the title/author.
   async function handleAddScan(code: string) {
     setScanning(false);
+    const match = (books ?? []).find((b) => b.barcode === code);
+    if (match) {
+      setExistingMatch(match);
+      setMessage(null);
+      return;
+    }
+    setExistingMatch(null);
     setNewBarcode(code);
     if (!newTitle.trim() && !newAuthor.trim()) {
       setLookingUp(true);
@@ -107,6 +118,25 @@ export default function BooksAdmin() {
       } else {
         setMessage("Barcode captured. That ISBN isn't in the book database — type the title and author.");
       }
+    }
+  }
+
+  // "+1 copy" for a scanned duplicate, then straight back to the
+  // camera so a pile of books can be worked through scan-by-scan.
+  async function addCopy(book: AdminBook) {
+    const res = await fetch(`/api/admin/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stock_total: book.stock_total + 1 }),
+    });
+    setExistingMatch(null);
+    if (res.ok) {
+      setMessage(`${book.title} now has ${book.stock_total + 1} copies. Scan the next book!`);
+      load();
+      setScanning(true);
+      setScanKey((k) => k + 1);
+    } else {
+      setMessage("Couldn't add the copy — try again.");
     }
   }
 
@@ -182,6 +212,27 @@ export default function BooksAdmin() {
             <button type="button" className="btn ghost" onClick={() => setScanning(false)}>
               Close camera
             </button>
+          </div>
+        )}
+        {existingMatch && (
+          <div className="scan-duplicate">
+            <p>
+              <strong>{existingMatch.title}</strong> is already in the catalogue with{" "}
+              {existingMatch.stock_total} cop{existingMatch.stock_total === 1 ? "y" : "ies"}.
+              Another copy of the same book?
+            </p>
+            <div className="admin-form-row" style={{ marginTop: 10 }}>
+              <button type="button" className="btn" onClick={() => addCopy(existingMatch)}>
+                Yes — add a copy (make it {existingMatch.stock_total + 1})
+              </button>
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={() => setExistingMatch(null)}
+              >
+                No, never mind
+              </button>
+            </div>
           </div>
         )}
         <div className="admin-form-row">
